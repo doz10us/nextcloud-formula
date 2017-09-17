@@ -67,6 +67,7 @@ local.properties
 ### JetBrains
 
 .idea
+.idea/*
 
 # CMake
 cmake-build-debug/

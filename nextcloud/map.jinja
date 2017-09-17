@@ -1,0 +1,47 @@
+{% set nextcloud_default = salt['grains.filter_by']({
+    'Debian': {
+        'server': 'nextcloud-server',
+        'client': 'nextcloud-client',
+        'service': 'nextcloud',
+    },
+    'RedHat': {
+        'server': 'nextcloud-server',
+        'client': 'nextcloud',
+        'service': 'nextcloudd',
+    },
+    'Gentoo': {
+        'server': 'dev-db/nextcloud',
+        'client': 'dev-db/nextcloud',
+        'service': 'nextcloud',
+    },
+}, merge=salt['pillar.get']('nextcloud:lookup')) %}
+
+{% set nextcloud_os = salt['grains.filter_by']({
+    'linux': {
+      'os': 'Linux',
+    },
+    'darwin': {
+      'os': 'Mac',
+    },
+    'windows': {
+      'os': 'Windows',
+    },
+}, grain='kernel', merge=salt['pillar.get']('nextcloud:lookup')) %}
+
+{% set nextcloud = salt['pillar.get']('nextcloud_os', default=nextcloud_default, merge=True) %}
+
+{%- if (nextcloud.version.full is defined) %}
+{%- set package = 'nextcloud-' ~ nextcloud.version.full %}
+{%- elif (nextcloud.version.minor == 'latest') and (nextcloud.version.major is defined) %}
+{%- set package = nextcloud.version.minor ~ '-' ~ nextcloud.version.major %}
+{%- else %}
+{%- set package = 'latest' %}
+{%- endif %}
+
+{% set nextcloud_repo = {
+  'url':  'https://download.nextcloud.com/' ~ nextcloud.platform | default('server') ~
+  '/releases/' ~ nextcloud.os ~ '/' ~ package ~ nextcloud.archive | default('.tar.bz2'),
+}
+%}
+
+{% set nextcloud = salt['pillar.get']('nextcloud_repo', default=nextcloud_default, merge=True) %}

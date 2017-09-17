@@ -1,0 +1,35 @@
+---
+driver:
+  name: docker
+  use_sudo: false
+  privileged: true
+
+provisioner:
+  name: salt_solo
+  formula: nextcloud
+  require_chef: false
+  salt_version: '2016.11'
+  pillars:
+    top.sls:
+      base:
+        "*":
+          - nextcloud
+  state_top:
+    base:
+      "*":
+        - nextcloud
+
+platforms:
+  - name: ubuntu-14.04
+    driver_config:
+      provision_command:
+        - locale-gen en_US.UTF-8
+  - name: ubuntu-16.04
+    driver_config:
+      provision_command:
+        - locale-gen en_US.UTF-8
+      run_command: /sbin/init
+  - name: centos-7
+
+suites:
+- name: default
